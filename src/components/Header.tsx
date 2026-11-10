@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Currency } from '../types';
-import { Language, LANGUAGES } from '../translations';
+import { Language, LANGUAGES } from './translations';
 
 interface HeaderProps {
   currency: Currency;
