@@ -108,8 +108,9 @@ export default function CatalogView({
                     от{' '}
                     <strong className="text-white">
                       {currency === 'KZT'
-                        ? `${country.minPriceKZT} ₸`
-                        : `$${country.minPriceUSD}`}
+  ? `${Math.round(country.startUsd * 500 * 2.5)
+      .toLocaleString('ru-RU')} ₸`
+  : `$${(country.startUsd * 2.5).toFixed(2)}`}
                     </strong>
                   </span>
                   <div className="w-5 h-5 rounded-full bg-slate-700/60 flex items-center justify-center text-slate-300 group-hover:bg-cyan-500 group-hover:text-white transition">
