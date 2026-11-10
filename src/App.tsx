@@ -40,15 +40,16 @@ export default function App() {
   const t = (key: string) => translations?.[lang]?.[key] || translations?.['ru']?.[key] || key;
 
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [checkoutCountry, setCheckoutCountry] =
+  useState<Country | null>(null);
   const [selectedTariff, setSelectedTariff] = useState<SelectedTariff | null>(null);
   const [compatOpen, setCompatOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
+  setToastMessage(msg);
+};
 
   // Поиск и фильтрация по всем 78 странам на любом языке
   const visibleCountries = useMemo(() => {
@@ -114,12 +115,11 @@ export default function App() {
               if (found) setSelectedCountry(found);
             }}
             onShowActiveQR={() => setSuccessOpen(true)}
-            t={t}
           />
         )}
       </main>
 
-      <NavBar active={tab} onChange={setTab} t={t} />
+      <NavBar active={tab} onChange={setTab} />
 
       {selectedCountry && (
         <TariffModal
@@ -128,9 +128,10 @@ export default function App() {
           currency={currency}
           onClose={() => setSelectedCountry(null)}
           onCheckout={(tariff) => {
-            setSelectedTariff(tariff);
-            setSelectedCountry(null);
-          }}
+  setCheckoutCountry(selectedCountry);
+  setSelectedTariff(tariff);
+  setSelectedCountry(null);
+}}
           t={t}
         />
       )}
@@ -139,19 +140,31 @@ export default function App() {
         <CheckoutModal
           open={Boolean(selectedTariff)}
           tariff={selectedTariff}
+          country={checkoutCountry}
           currency={currency}
           onClose={() => setSelectedTariff(null)}
-          onSuccess={() => {
+          onPaySuccess={() => {
             setSelectedTariff(null);
             setSuccessOpen(true);
           }}
-          t={t}
+          onShowToast={showToast}
         />
       )}
 
-      <CompatModal open={compatOpen} onClose={() => setCompatOpen(false)} t={t} />
-      <SuccessModal open={successOpen} onClose={() => setSuccessOpen(false)} t={t} />
-      {toastMessage && <Toast message={toastMessage} />}
+      <CompatModal open={compatOpen} onClose={() => setCompatOpen(false)} />
+      <SuccessModal
+  open={successOpen}
+  onShowToast={showToast}
+  onFinish={() => {
+    setSuccessOpen(false);
+    setTab('profile');
+  }}
+/>
+      <Toast
+  message={toastMessage || ''}
+  visible={Boolean(toastMessage)}
+  onDismiss={() => setToastMessage(null)}
+/>
     </div>
   );
 }
