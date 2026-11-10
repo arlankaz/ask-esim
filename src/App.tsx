@@ -117,13 +117,16 @@ const currentCategory = regionMap[category] || category;
           />
         ) : (
           <ProfileView
-            onShowToast={showToast}
-            onSelectCountryById={(id) => {
-              const found = countriesData.find((c) => c.id === id);
-              if (found) setSelectedCountry(found);
-            }}
-            onShowActiveQR={() => setSuccessOpen(true)}
-          />
+  onShowToast={showToast}
+  onSelectCountryById={(id) => {
+    const found = countriesData.find((c) => c.id === id);
+    if (found) setSelectedCountry(found);
+  }}
+  onShowActiveQR={() => setSuccessOpen(true)}
+  t={t}
+  lang={lang}
+/>
+
         )}
       </main>
 
