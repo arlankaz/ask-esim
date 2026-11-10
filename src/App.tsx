@@ -71,8 +71,16 @@ export default function App() {
         translatedName.includes(searchLower);
 
       const isPop = c.isPopular ?? c.popular ?? true;
-      const countryRegion = (c.region || '').toLowerCase();
-      const currentCategory = category.toLowerCase();
+      const regionMap: Record<string, string> = {
+  europe: 'EU',
+  asia: 'ASIA',
+  middleEast: 'ME',
+  america: 'AMERICA',
+  africa: 'AFRICA',
+};
+
+const countryRegion = c.region;
+const currentCategory = regionMap[category] || category;
 
       const matchCat =
         currentCategory === 'popular'
