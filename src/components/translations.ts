@@ -8,7 +8,7 @@ export interface LanguageOption {
 
 export const LANGUAGES: LanguageOption[] = [
   { code: 'ru', label: 'Русский', flag: '🇷🇺' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'en', label: 'English', flag: 'us' },
   { code: 'kk', label: 'Қазақша', flag: '🇰🇿' },
   { code: 'uz', label: "O'zbekcha", flag: '🇺🇿' },
   { code: 'uk', label: 'Українська', flag: '🇺🇦' },
@@ -22,6 +22,9 @@ export const translations: Record<Language, Record<string, string>> = {
     europe: 'Европа',
     asia: 'Азия',
     middleEast: 'Ближний Восток',
+    america: 'Америка',
+    africa: 'Африка',
+    global: 'Весь мир',
     myEsim: 'Мои eSIM',
     referralSystem: 'Реферальная система',
     support: 'Поддержка',
@@ -41,6 +44,9 @@ export const translations: Record<Language, Record<string, string>> = {
     europe: 'Europe',
     asia: 'Asia',
     middleEast: 'Middle East',
+    america: 'America',
+    africa: 'Africa',
+    global: 'Global',
     myEsim: 'My eSIMs',
     referralSystem: 'Referral Program',
     support: 'Support',
@@ -60,6 +66,9 @@ export const translations: Record<Language, Record<string, string>> = {
     europe: 'Еуропа',
     asia: 'Азия',
     middleEast: 'Таяу Шығыс',
+    america: 'Америка',
+    africa: 'Африка',
+    global: 'Бүкіл әлем',
     myEsim: 'Менің eSIM-дерім',
     referralSystem: 'Реферальды жүйе',
     support: 'Қолдау қызметі',
@@ -79,6 +88,9 @@ export const translations: Record<Language, Record<string, string>> = {
     europe: 'Yevropa',
     asia: 'Osiyo',
     middleEast: 'Yaqin Sharq',
+    america: 'Amerika',
+    africa: 'Afrika',
+    global: 'Butun dunyo',
     myEsim: 'Mening eSIM-larim',
     referralSystem: 'Tavsiya tizimi',
     support: "Qo'llab-quvvatlash",
@@ -98,6 +110,9 @@ export const translations: Record<Language, Record<string, string>> = {
     europe: 'Європа',
     asia: 'Азія',
     middleEast: 'Близький Схід',
+    america: 'Америка',
+    africa: 'Африка',
+    global: 'Весь світ',
     myEsim: 'Мої eSIM',
     referralSystem: 'Реферальна система',
     support: 'Підтримка',
@@ -117,6 +132,9 @@ export const translations: Record<Language, Record<string, string>> = {
     europe: 'Europa',
     asia: 'Asien',
     middleEast: 'Naher Osten',
+    america: 'Amerika',
+    africa: 'Afrika',
+    global: 'Weltweit',
     myEsim: 'Meine eSIMs',
     referralSystem: 'Empfehlungsprogramm',
     support: 'Support',
@@ -133,17 +151,21 @@ export const translations: Record<Language, Record<string, string>> = {
 };
 
 export const getInitialLanguage = (): Language => {
-  const saved = localStorage.getItem('app_lang') as Language;
-  if (saved && translations[saved]) return saved;
+  if (typeof window === 'undefined') return 'ru';
+  try {
+    const saved = localStorage.getItem('app_lang') as Language;
+    if (saved && translations[saved]) return saved;
 
-  const tgLang = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code?.toLowerCase();
-  if (tgLang) {
-    if (tgLang.startsWith('kk')) return 'kk';
-    if (tgLang.startsWith('uz')) return 'uz';
-    if (tgLang.startsWith('uk')) return 'uk';
-    if (tgLang.startsWith('de')) return 'de';
-    if (tgLang.startsWith('en')) return 'en';
+    const tgLang = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code?.toLowerCase();
+    if (tgLang) {
+      if (tgLang.startsWith('kk')) return 'kk';
+      if (tgLang.startsWith('uz')) return 'uz';
+      if (tgLang.startsWith('uk')) return 'uk';
+      if (tgLang.startsWith('de')) return 'de';
+      if (tgLang.startsWith('en')) return 'en';
+    }
+  } catch (e) {
+    console.error(e);
   }
-
   return 'ru';
 };
