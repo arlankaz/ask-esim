@@ -78,10 +78,16 @@ export default function CatalogView({
       </div>
 
       {/* Заголовок секции */}
-      <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-        <span className="uppercase tracking-wider">Направления для поездок</span>
-        <span>{countries.length} стран</span>
-      </div>
+      
+<div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+  <span className="uppercase tracking-wider">
+    {t('travelDestinations')}
+  </span>
+  <span>
+    {countries.length} {t('countriesCount')}
+  </span>
+</div>
+
 
       {/* Сетка стран */}
       {countries.length > 0 ? (
@@ -101,11 +107,13 @@ export default function CatalogView({
 
               <div>
                 <h3 className="font-bold text-sm text-white group-hover:text-cyan-400 transition">
-                  {country.name}
+                  {t(country.id.toLowerCase()) === country.id.toLowerCase()
+  ? country.name
+  : t(country.id.toLowerCase())}
                 </h3>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-[11px] text-slate-400">
-                    от{' '}
+                    {t('from')}{' '}
                     <strong className="text-white">
                       {currency === 'KZT'
   ? `${Math.round(country.startUsd * 500 * 2.5)
