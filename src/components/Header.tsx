@@ -41,7 +41,7 @@ export default function Header({
           <div>
             <div className="flex items-center gap-1.5">
               <h1 className="font-extrabold text-lg leading-none tracking-tight bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-                ASK eSIM
+                A-Mobile eSIM
               </h1>
               <span className="text-[9px] bg-brand-500/20 text-brand-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                 5G LTE
