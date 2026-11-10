@@ -29,6 +29,9 @@ export default function CatalogView({
     { id: 'europe', label: t('europe') || 'Европа' },
     { id: 'asia', label: t('asia') || 'Азия' },
     { id: 'middleEast', label: t('middleEast') || 'Ближний Восток' },
+    { id: 'america', label: t('america') || 'Америка' },
+    { id: 'africa', label: t('africa') || 'Африка' },
+    { id: 'global', label: t('global') || 'Весь мир' },
   ];
 
   return (
@@ -57,7 +60,7 @@ export default function CatalogView({
         </svg>
       </div>
 
-      {/* Категории */}
+      {/* Категории (все 7 регионов) */}
       <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
         {categories.map((cat) => (
           <button
