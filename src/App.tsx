@@ -20,14 +20,24 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('popular');
 
-  const [lang, setLang] = useState<Language>(getInitialLanguage);
+  const [lang, setLang] = useState<Language>(() => {
+    try {
+      return getInitialLanguage() || 'ru';
+    } catch {
+      return 'ru';
+    }
+  });
 
   const changeLanguage = (newLang: Language) => {
     setLang(newLang);
-    localStorage.setItem('app_lang', newLang);
+    try {
+      localStorage.setItem('app_lang', newLang);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const t = (key: string) => translations[lang]?.[key] || translations['ru'][key] || key;
+  const t = (key: string) => translations?.[lang]?.[key] || translations?.['ru']?.[key] || key;
 
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [selectedTariff, setSelectedTariff] = useState<SelectedTariff | null>(null);
@@ -40,15 +50,39 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // Поиск и фильтрация по всем 78 странам на любом языке
   const visibleCountries = useMemo(() => {
-    return countriesData.filter((c) => {
-      const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
-      // Поддержка обоих вариантов поля популярности из data.ts
-      const isPop = c.isPopular ?? (c as any).popular ?? true;
-      const matchCat = category === 'popular' ? isPop : c.region === category;
+    if (!Array.isArray(countriesData)) return [];
+
+    return countriesData.filter((c: any) => {
+      if (!c) return false;
+      const searchLower = (search || '').trim().toLowerCase();
+
+      // Оригинальное имя страны и переведенное имя
+      const origName = (c.name || '').toLowerCase();
+      const key = (c.id || c.name || '').toLowerCase();
+      const translatedName = (translations?.[lang]?.[key] || '').toLowerCase();
+
+      // Поиск совпадения по оригинальному ИЛИ переведенному названию
+      const matchSearch =
+        !searchLower ||
+        origName.includes(searchLower) ||
+        translatedName.includes(searchLower);
+
+      const isPop = c.isPopular ?? c.popular ?? true;
+      const countryRegion = (c.region || '').toLowerCase();
+      const currentCategory = category.toLowerCase();
+
+      const matchCat =
+        currentCategory === 'popular'
+          ? isPop
+          : currentCategory === 'global'
+          ? true
+          : countryRegion === currentCategory;
+
       return matchSearch && matchCat;
     });
-  }, [search, category]);
+  }, [search, category, lang]);
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-white flex flex-col justify-between font-sans">
