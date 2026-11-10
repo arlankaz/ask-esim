@@ -10,6 +10,7 @@ import SuccessModal from './components/SuccessModal';
 import Toast from './components/Toast';
 import { countriesData } from './data';
 import type { Country, Currency, SelectedTariff } from './types';
+import { getInitialLanguage, translations, Language } from './translations';
 
 type Tab = 'home' | 'profile';
 
@@ -19,119 +20,102 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('popular');
 
+  const [lang, setLang] = useState<Language>(getInitialLanguage);
+
+  const changeLanguage = (newLang: Language) => {
+    setLang(newLang);
+    localStorage.setItem('app_lang', newLang);
+  };
+
+  const t = (key: string) => translations[lang]?.[key] || translations['ru'][key] || key;
+
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [selectedTariff, setSelectedTariff] = useState<SelectedTariff | null>(null);
-
-  const [tariffOpen, setTariffOpen] = useState(false);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [compatOpen, setCompatOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const [toast, setToast] = useState({ msg: '', visible: false, variant: 'success' as 'success' | 'error' });
-
-  const showToast = (msg: string, variant: 'success' | 'error' = 'success') => {
-    setToast({ msg, visible: true, variant });
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const visibleCountries = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (q) return countriesData.filter((c) => c.name.toLowerCase().includes(q));
-    if (category === 'popular') return countriesData.filter((c) => c.popular);
-    if (category === 'all') return countriesData;
-    return countriesData.filter((c) => c.region === category);
+    return countriesData.filter((c) => {
+      const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
+      const matchCat = category === 'popular' ? c.isPopular : c.region === category;
+      return matchSearch && matchCat;
+    });
   }, [search, category]);
 
-  const handleSelectCountry = (c: Country) => {
-    setSelectedCountry(c);
-    setTariffOpen(true);
-  };
-
-  const handleSelectCountryById = (id: string) => {
-    const c = countriesData.find((x) => x.id === id);
-    if (c) handleSelectCountry(c);
-  };
-
-  const handleCheckout = (t: SelectedTariff) => {
-    setSelectedTariff(t);
-    setTariffOpen(false);
-    setCheckoutOpen(true);
-  };
-
-  const handlePaySuccess = () => {
-    setCheckoutOpen(false);
-    setSuccessOpen(true);
-  };
-
-  const handleFinishOrder = () => {
-    setSuccessOpen(false);
-    setTab('profile');
-  };
-
   return (
-    <div className="bg-gray-950 text-gray-100 min-h-screen font-sans pb-28 antialiased selection:bg-brand-500 selection:text-white">
-      <Toast
-        message={toast.msg}
-        visible={toast.visible}
-        variant={toast.variant}
-        onDismiss={() => setToast((t) => ({ ...t, visible: false }))}
+    <div className="min-h-screen bg-[#0b0f19] text-white flex flex-col justify-between font-sans">
+      <Header
+        currency={currency}
+        onCurrencyChange={setCurrency}
+        currentLang={lang}
+        onLanguageChange={changeLanguage}
       />
 
-      <div className="max-w-md mx-auto relative min-h-screen flex flex-col justify-between">
-        <Header
-          currency={currency}
-          onCurrencyChange={setCurrency}
-          search={search}
-          onSearchChange={setSearch}
-          category={category}
-          onCategoryChange={(c) => {
-            setCategory(c);
-            setSearch('');
-          }}
-          countryCount=""
-          compact={tab === 'profile'}
-        />
+      <main className="pb-24">
+        {tab === 'home' ? (
+          <CatalogView
+            search={search}
+            setSearch={setSearch}
+            category={category}
+            setCategory={setCategory}
+            countries={visibleCountries}
+            currency={currency}
+            onSelectCountry={setSelectedCountry}
+            onOpenCompat={() => setCompatOpen(true)}
+            t={t}
+          />
+        ) : (
+          <ProfileView
+            onShowToast={showToast}
+            onSelectCountryById={(id) => {
+              const found = countriesData.find((c) => c.id === id);
+              if (found) setSelectedCountry(found);
+            }}
+            onShowActiveQR={() => setSuccessOpen(true)}
+            t={t}
+          />
+        )}
+      </main>
 
-        <main className="p-4 flex-1 safe-pb space-y-4">
-          {tab === 'home' ? (
-            <CatalogView
-              countries={visibleCountries}
-              currency={currency}
-              onSelectCountry={handleSelectCountry}
-              onOpenCompat={() => setCompatOpen(true)}
-            />
-          ) : (
-            <ProfileView
-              onShowToast={showToast}
-              onSelectCountryById={handleSelectCountryById}
-              onShowActiveQR={() => setSuccessOpen(true)}
-            />
-          )}
-        </main>
+      <NavBar active={tab} onChange={setTab} t={t} />
 
-        <NavBar active={tab} onChange={setTab} />
-
+      {selectedCountry && (
         <TariffModal
-          open={tariffOpen}
+          open={Boolean(selectedCountry)}
           country={selectedCountry}
           currency={currency}
-          onClose={() => setTariffOpen(false)}
-          onCheckout={handleCheckout}
+          onClose={() => setSelectedCountry(null)}
+          onCheckout={(tariff) => {
+            setSelectedTariff(tariff);
+            setSelectedCountry(null);
+          }}
+          t={t}
         />
+      )}
 
+      {selectedTariff && (
         <CheckoutModal
-          open={checkoutOpen}
-          country={selectedCountry}
+          open={Boolean(selectedTariff)}
           tariff={selectedTariff}
           currency={currency}
-          onClose={() => setCheckoutOpen(false)}
-          onPaySuccess={handlePaySuccess}
-          onShowToast={showToast}
+          onClose={() => setSelectedTariff(null)}
+          onSuccess={() => {
+            setSelectedTariff(null);
+            setSuccessOpen(true);
+          }}
+          t={t}
         />
+      )}
 
-        <CompatModal open={compatOpen} onClose={() => setCompatOpen(false)} />
-
-        <SuccessModal open={successOpen} onShowToast={showToast} onFinish={handleFinishOrder} />
-      </div>
+      <CompatModal open={compatOpen} onClose={() => setCompatOpen(false)} t={t} />
+      <SuccessModal open={successOpen} onClose={() => setSuccessOpen(false)} t={t} />
+      {toastMessage && <Toast message={toastMessage} />}
     </div>
   );
 }
