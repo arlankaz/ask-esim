@@ -10,7 +10,7 @@ import SuccessModal from './components/SuccessModal';
 import Toast from './components/Toast';
 import { countriesData } from './data';
 import type { Country, Currency, SelectedTariff } from './types';
-import { getInitialLanguage, translations, Language } from './translations';
+import { getInitialLanguage, translations, Language } from './components/translations';
 
 type Tab = 'home' | 'profile';
 
