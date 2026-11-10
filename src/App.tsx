@@ -43,7 +43,9 @@ export default function App() {
   const visibleCountries = useMemo(() => {
     return countriesData.filter((c) => {
       const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
-      const matchCat = category === 'popular' ? c.isPopular : c.region === category;
+      // Поддержка обоих вариантов поля популярности из data.ts
+      const isPop = c.isPopular ?? (c as any).popular ?? true;
+      const matchCat = category === 'popular' ? isPop : c.region === category;
       return matchSearch && matchCat;
     });
   }, [search, category]);
