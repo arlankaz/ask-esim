@@ -1,34 +1,54 @@
+
 import { Wifi, User } from 'lucide-react';
 
 type Tab = 'home' | 'profile';
 
 interface NavBarProps {
   active: Tab;
-  onChange: (t: Tab) => void;
+  onChange: (tab: Tab) => void;
 }
 
-export default function NavBar({ active, onChange }: NavBarProps) {
+export default function NavBar({
+  active,
+  onChange,
+}: NavBarProps) {
   return (
-    <nav className="fixed bottom-4 left-0 right-0 z-40 px-4 pointer-events-none">
-      <div className="max-w-[220px] mx-auto bg-gray-900/90 glass-header border border-gray-800/90 p-1.5 rounded-full shadow-2xl flex items-center justify-between pointer-events-auto">
+    <nav
+      aria-label="Main navigation"
+      className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 px-4"
+    >
+      <div className="glass-header pointer-events-auto mx-auto flex w-full max-w-[300px] items-center gap-2 rounded-full border border-gray-800/90 bg-gray-900/90 p-1.5 shadow-2xl">
+
+        {/* eSIM */}
         <button
+          type="button"
           onClick={() => onChange('home')}
-          className={`flex-1 py-2 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
-            active === 'home' ? 'bg-brand-500 text-white shadow-md' : 'text-gray-400 hover:text-white'
+          aria-current={active === 'home' ? 'page' : undefined}
+          className={`flex h-[52px] min-w-0 flex-1 items-center justify-center gap-2 rounded-full text-sm font-bold transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+            active === 'home'
+              ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20'
+              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
           }`}
         >
-          <Wifi className="w-4 h-4" />
+          <Wifi className="h-5 w-5 shrink-0" />
           <span>eSIM</span>
         </button>
+
+        {/* Profile */}
         <button
+          type="button"
           onClick={() => onChange('profile')}
-          className={`flex-1 py-2 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
-            active === 'profile' ? 'bg-brand-500 text-white shadow-md' : 'text-gray-400 hover:text-white'
+          aria-current={active === 'profile' ? 'page' : undefined}
+          className={`flex h-[52px] min-w-0 flex-1 items-center justify-center gap-2 rounded-full text-sm font-bold transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+            active === 'profile'
+              ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20'
+              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
           }`}
         >
-          <User className="w-4 h-4" />
+          <User className="h-5 w-5 shrink-0" />
           <span>Profile</span>
         </button>
+
       </div>
     </nav>
   );
