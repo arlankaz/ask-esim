@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Header from './components/Header';
 import NavBar from './components/NavBar';
 import CatalogView from './components/CatalogView';
@@ -6,72 +6,24 @@ import ProfileView from './components/ProfileView';
 import TariffModal from './components/TariffModal';
 import CheckoutModal from './components/CheckoutModal';
 import CompatModal from './components/CompatModal';
-import SuccessModal from './components/SuccessModal';
 import Toast from './components/Toast';
 import { countriesData } from './data';
 import type { Country, Currency, SelectedTariff } from './types';
-import { getInitialLanguage, translations, Language } from './components/translations';
+import {
+  getInitialLanguage,
+  translations,
+  type Language,
+} from './components/translations';
 
 type Tab = 'home' | 'profile';
+type ToastVariant = 'success' | 'error';
 
-export default function App() {
-  const [tab, setTab] = useState<Tab>('home');
-  const [currency, setCurrency] = useState<Currency>('KZT');
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('popular');
-
-  const [lang, setLang] = useState<Language>(() => {
-    try {
-      return getInitialLanguage() || 'ru';
-    } catch {
-      return 'ru';
-    }
-  });
-
-  const changeLanguage = (newLang: Language) => {
-    setLang(newLang);
-    try {
-      localStorage.setItem('app_lang', newLang);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const t = (key: string) => translations?.[lang]?.[key] || translations?.['ru']?.[key] || key;
-
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
-  const [checkoutCountry, setCheckoutCountry] =
-  useState<Country | null>(null);
-  const [selectedTariff, setSelectedTariff] = useState<SelectedTariff | null>(null);
-  const [compatOpen, setCompatOpen] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-  setToastMessage(msg);
+type OrderSelection = {
+  country: Country;
+  tariff: SelectedTariff;
 };
 
-  // Поиск и фильтрация по всем 78 странам на любом языке
-  const visibleCountries = useMemo(() => {
-    if (!Array.isArray(countriesData)) return [];
-
-    return countriesData.filter((c: any) => {
-      if (!c) return false;
-      const searchLower = (search || '').trim().toLowerCase();
-
-      // Оригинальное имя страны и переведенное имя
-      const origName = (c.name || '').toLowerCase();
-      const key = (c.id || c.name || '').toLowerCase();
-      const translatedName = (translations?.[lang]?.[key] || '').toLowerCase();
-
-      // Поиск совпадения по оригинальному ИЛИ переведенному названию
-      const matchSearch =
-        !searchLower ||
-        origName.includes(searchLower) ||
-        translatedName.includes(searchLower);
-
-      const isPop = c.isPopular ?? c.popular ?? true;
-      const regionMap: Record<string, string> = {
+const REGION_BY_CATEGORY: Record<string, string> = {
   europe: 'EU',
   asia: 'ASIA',
   middleEast: 'ME',
@@ -79,22 +31,139 @@ export default function App() {
   africa: 'AFRICA',
 };
 
-const countryRegion = c.region;
-const currentCategory = regionMap[category] || category;
+const demoTexts: Record<Language, {
+  title: string;
+  description: string;
+  notCharged: string;
+  returnToCatalog: string;
+  viewProfile: string;
+  qrUnavailable: string;
+}> = {
+  ru: {
+    title: 'Демонстрация заказа',
+    description: 'Сценарий оформления пройден. Это предварительный просмотр интерфейса: настоящий заказ не создан.',
+    notCharged: 'Оплата не проводилась. eSIM и QR-код не выдавались.',
+    returnToCatalog: 'Вернуться в каталог',
+    viewProfile: 'Открыть профиль',
+    qrUnavailable: 'QR-код пока недоступен: в профиле отображается демонстрационная eSIM.',
+  },
+  en: {
+    title: 'Order preview',
+    description: 'You have completed the checkout preview. No real order has been created.',
+    notCharged: 'No payment was made. No eSIM or QR code was issued.',
+    returnToCatalog: 'Back to catalog',
+    viewProfile: 'Open profile',
+    qrUnavailable: 'QR code is unavailable: the eSIM shown in your profile is a demo.',
+  },
+  kk: {
+    title: 'Тапсырыс үлгісі',
+    description: 'Рәсімдеу интерфейсінің үлгісін аяқтадыңыз. Нақты тапсырыс жасалған жоқ.',
+    notCharged: 'Төлем алынбады. eSIM және QR-код берілген жоқ.',
+    returnToCatalog: 'Каталогқа қайту',
+    viewProfile: 'Профильді ашу',
+    qrUnavailable: 'QR-код әзірге қолжетімсіз: профильдегі eSIM — демо-нұсқа.',
+  },
+  uz: {
+    title: 'Buyurtma namoyishi',
+    description: 'Buyurtma berish jarayonining namoyishi tugadi. Haqiqiy buyurtma yaratilmagan.',
+    notCharged: 'To‘lov amalga oshirilmadi. eSIM yoki QR-kod berilmadi.',
+    returnToCatalog: 'Katalogga qaytish',
+    viewProfile: 'Profilni ochish',
+    qrUnavailable: 'QR-kod hozircha mavjud emas: profildagi eSIM demo hisoblanadi.',
+  },
+  uk: {
+    title: 'Демонстрація замовлення',
+    description: 'Перегляд оформлення завершено. Справжнє замовлення не створено.',
+    notCharged: 'Оплату не проведено. eSIM та QR-код не видано.',
+    returnToCatalog: 'Повернутися до каталогу',
+    viewProfile: 'Відкрити профіль',
+    qrUnavailable: 'QR-код поки недоступний: eSIM у профілі демонстраційна.',
+  },
+  de: {
+    title: 'Bestellvorschau',
+    description: 'Du hast die Vorschau des Bestellablaufs abgeschlossen. Es wurde keine echte Bestellung erstellt.',
+    notCharged: 'Es wurde nichts bezahlt. Keine eSIM oder QR-Code wurde ausgestellt.',
+    returnToCatalog: 'Zurück zum Katalog',
+    viewProfile: 'Profil öffnen',
+    qrUnavailable: 'QR-Code nicht verfügbar: Die eSIM im Profil ist nur eine Demo.',
+  },
+};
 
-      const matchCat =
-        currentCategory === 'popular'
-          ? isPop
-          : currentCategory === 'global'
-          ? true
-          : countryRegion === currentCategory;
+export default function App() {
+  const [tab, setTab] = useState<Tab>('home');
+  const [currency, setCurrency] = useState<Currency>('KZT');
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('popular');
+  const [lang, setLang] = useState<Language>(() => getInitialLanguage());
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [checkout, setCheckout] = useState<OrderSelection | null>(null);
+  const [demoOrder, setDemoOrder] = useState<OrderSelection | null>(null);
+  const [compatOpen, setCompatOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-      return matchSearch && matchCat;
+  const t = (key: string): string =>
+    translations[lang]?.[key] ?? translations.ru[key] ?? key;
+
+  const changeLanguage = (nextLanguage: Language) => {
+    setLang(nextLanguage);
+    try {
+      localStorage.setItem('app_lang', nextLanguage);
+    } catch {
+      // Language selection still works for the current session.
+    }
+  };
+
+  const showToast = useCallback((message: string, variant: ToastVariant = 'success') => {
+    setToast({ message, variant });
+  }, []);
+
+  const visibleCountries = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    const region = REGION_BY_CATEGORY[category];
+
+    return countriesData.filter((country) => {
+      const translatedName =
+        translations[lang]?.[country.id.toLowerCase()] ??
+        translations[lang]?.[country.name.toLowerCase()] ??
+        country.name;
+      const matchesSearch =
+        !query ||
+        country.name.toLocaleLowerCase().includes(query) ||
+        translatedName.toLocaleLowerCase().includes(query);
+      const matchesCategory =
+        category === 'global' ||
+        (category === 'popular' ? country.popular : country.region === region);
+
+      return matchesSearch && matchesCategory;
     });
   }, [search, category, lang]);
 
+  const closeCheckout = useCallback(() => {
+    if (checkout) {
+      setSelectedCountry(checkout.country); // Back to the chosen country's tariffs.
+      setCheckout(null);
+    }
+  }, [checkout]);
+
+  const closeTopmost = useCallback(() => {
+    if (demoOrder) setDemoOrder(null);
+    else if (checkout) closeCheckout();
+    else if (selectedCountry) setSelectedCountry(null);
+    else if (compatOpen) setCompatOpen(false);
+  }, [demoOrder, checkout, selectedCountry, compatOpen, closeCheckout]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeTopmost();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [closeTopmost]);
+
+  const localeDemo = demoTexts[lang];
+
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-white flex flex-col justify-between font-sans">
+    <div className="min-h-screen bg-[#0b0f19] text-white flex flex-col font-sans">
       <Header
         currency={currency}
         onCurrencyChange={setCurrency}
@@ -102,7 +171,7 @@ const currentCategory = regionMap[category] || category;
         onLanguageChange={changeLanguage}
       />
 
-      <main className="pb-24">
+      <main className="flex-1 pb-24">
         {tab === 'home' ? (
           <CatalogView
             search={search}
@@ -117,16 +186,15 @@ const currentCategory = regionMap[category] || category;
           />
         ) : (
           <ProfileView
-  onShowToast={showToast}
-  onSelectCountryById={(id) => {
-    const found = countriesData.find((c) => c.id === id);
-    if (found) setSelectedCountry(found);
-  }}
-  onShowActiveQR={() => setSuccessOpen(true)}
-  t={t}
-  lang={lang}
-/>
-
+            onShowToast={showToast}
+            onSelectCountryById={(id) => {
+              const country = countriesData.find((item) => item.id === id);
+              if (country) setSelectedCountry(country);
+            }}
+            onShowActiveQR={() => showToast(localeDemo.qrUnavailable, 'error')}
+            t={t}
+            lang={lang}
+          />
         )}
       </main>
 
@@ -134,48 +202,77 @@ const currentCategory = regionMap[category] || category;
 
       {selectedCountry && (
         <TariffModal
-          open={Boolean(selectedCountry)}
+          key={selectedCountry.id}
+          open={true}
           country={selectedCountry}
           currency={currency}
           onClose={() => setSelectedCountry(null)}
           onCheckout={(tariff) => {
-  setCheckoutCountry(selectedCountry);
-  setSelectedTariff(tariff);
-  setSelectedCountry(null);
-}}
+            setCheckout({ country: selectedCountry, tariff });
+            setSelectedCountry(null);
+          }}
           t={t}
+          lang={lang}
         />
       )}
 
-      {selectedTariff && (
+      {checkout && (
         <CheckoutModal
-          open={Boolean(selectedTariff)}
-          tariff={selectedTariff}
-          country={checkoutCountry}
+          open={true}
+          country={checkout.country}
+          tariff={checkout.tariff}
           currency={currency}
-          onClose={() => setSelectedTariff(null)}
+          onClose={closeCheckout}
           onPaySuccess={() => {
-            setSelectedTariff(null);
-            setSuccessOpen(true);
+            // Frontend-only demonstration: no charge and no eSIM issuance.
+            setDemoOrder(checkout);
+            setCheckout(null);
           }}
           onShowToast={showToast}
         />
       )}
 
       <CompatModal open={compatOpen} onClose={() => setCompatOpen(false)} />
-      <SuccessModal
-  open={successOpen}
-  onShowToast={showToast}
-  onFinish={() => {
-    setSuccessOpen(false);
-    setTab('profile');
-  }}
-/>
+
+      {demoOrder && (
+        <div className="fixed inset-0 z-[55] flex flex-col justify-end bg-black/85 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="demo-order-title">
+          <div className="mx-auto w-full max-w-md space-y-4 rounded-t-3xl border-t border-gray-800 bg-gray-950 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] shadow-2xl drawer-slide-up">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500/15 text-2xl">✓</div>
+            <h2 id="demo-order-title" className="text-center text-xl font-extrabold">
+              {localeDemo.title}
+            </h2>
+            <p className="text-center text-sm leading-relaxed text-gray-300">{localeDemo.description}</p>
+            <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 text-sm text-gray-200">
+              <div className="font-semibold">{demoOrder.country.flag} {t(demoOrder.country.id.toLowerCase()) === demoOrder.country.id.toLowerCase() ? demoOrder.country.name : t(demoOrder.country.id.toLowerCase())}</div>
+              <div className="mt-1 text-gray-400">{demoOrder.tariff.volume}</div>
+            </div>
+            <p className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-center text-xs text-amber-200">
+              {localeDemo.notCharged}
+            </p>
+            <button
+              type="button"
+              onClick={() => { setDemoOrder(null); setTab('home'); }}
+              className="w-full rounded-2xl bg-brand-500 py-3.5 text-sm font-bold text-white"
+            >
+              {localeDemo.returnToCatalog}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setDemoOrder(null); setTab('profile'); }}
+              className="w-full rounded-2xl border border-gray-700 bg-gray-900 py-3 text-sm font-semibold text-white"
+            >
+              {localeDemo.viewProfile}
+            </button>
+          </div>
+        </div>
+      )}
+
       <Toast
-  message={toastMessage || ''}
-  visible={Boolean(toastMessage)}
-  onDismiss={() => setToastMessage(null)}
-/>
+        message={toast?.message ?? ''}
+        visible={Boolean(toast)}
+        variant={toast?.variant ?? 'success'}
+        onDismiss={() => setToast(null)}
+      />
     </div>
   );
 }
