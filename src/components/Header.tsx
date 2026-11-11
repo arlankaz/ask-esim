@@ -32,10 +32,10 @@ export default function Header({
         </div>
 
         <div className="min-w-0">
-          <h1 className="whitespace-nowrap text-[14px] font-extrabold leading-tight tracking-tight text-white">
+          <h1 className="whitespace-nowrap text-[17px] font-extrabold leading-tight tracking-tight text-white">
             A-Mobile eSIM
           </h1>
-          <p className="mt-0.5 text-[10px] font-medium leading-none tracking-wide text-cyan-400">
+          <p className="mt-0.5 text-[13px] font-medium leading-none tracking-wide text-cyan-400">
             Global Internet
           </p>
         </div>
