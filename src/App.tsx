@@ -232,7 +232,11 @@ export default function App() {
         />
       )}
 
-      <CompatModal open={compatOpen} onClose={() => setCompatOpen(false)} />
+      <CompatModal
+  open={compatOpen}
+  onClose={() => setCompatOpen(false)}
+  lang={lang}
+/>
 
       {demoOrder && (
         <div className="fixed inset-0 z-[55] flex flex-col justify-end bg-black/85 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="demo-order-title">
