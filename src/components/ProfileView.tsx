@@ -227,8 +227,6 @@ const copy: Record<Language, ProfileText> = {
   },
 };
 
-// Собственная SVG-иконка SIM-карты.
-// Не зависит от установленной версии lucide-react.
 function SimCardIcon({
   className = 'h-6 w-6',
 }: {
@@ -254,8 +252,6 @@ function SimCardIcon({
   );
 }
 
-// Данные Telegram используются только для отображения имени.
-// Это не является серверной авторизацией.
 function getTelegramDisplayName(): string | null {
   if (typeof window === 'undefined') return null;
 
@@ -292,7 +288,6 @@ export default function ProfileView({
   const [referralOpen, setReferralOpen] = useState(false);
 
   const labels = copy[lang] ?? copy.ru;
-
   const telegramName = getTelegramDisplayName();
   const displayName = telegramName || labels.guest;
   const initial =
@@ -301,7 +296,7 @@ export default function ProfileView({
   return (
     <section className="mx-auto w-full max-w-2xl space-y-4 px-4 pb-6 pt-4 fade-in">
 
-      {/* Профиль пользователя */}
+      {/* Пользователь */}
       <div className="flex items-center justify-between gap-3 rounded-3xl border border-gray-800 bg-gray-900/90 p-4 shadow-xl">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-brand-500 to-brand-600 text-lg font-extrabold text-white shadow-lg">
@@ -316,112 +311,108 @@ export default function ProfileView({
           </div>
 
           <div className="min-w-0">
-            <h2 className="truncate text-base font-extrabold leading-tight text-white">
+            <h2 className="truncate text-lg font-extrabold leading-tight text-white">
               {displayName}
             </h2>
 
-            <p className="mt-1 text-[11px] text-gray-400">
+            <p className="mt-1 text-[13px] font-medium text-gray-400">
               {labels.subtitle}
             </p>
           </div>
         </div>
 
-        <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-bold text-cyan-300">
+        <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-1 text-xs font-bold text-cyan-300">
           {labels.preview}
         </span>
       </div>
 
-      {/* Меню профиля */}
-      <div className="divide-y divide-gray-800/70 overflow-hidden rounded-3xl border border-gray-800 bg-gray-900/90 text-xs font-semibold">
+      {/* Меню */}
+      <div className="divide-y divide-gray-800/70 overflow-hidden rounded-3xl border border-gray-800 bg-gray-900/90 text-[15px] font-semibold">
 
         <button
           type="button"
           onClick={() => setReferralOpen(true)}
-          className="flex w-full items-center justify-between p-3.5 text-left transition-colors hover:bg-gray-800/80"
+          className="flex w-full min-h-[54px] items-center justify-between px-4 py-3 text-left transition-colors hover:bg-gray-800/80"
         >
           <span className="flex items-center gap-3">
-            <UserPlus className="h-4 w-4 text-brand-400" />
-
+            <UserPlus className="h-5 w-5 shrink-0 text-brand-400" />
             <span className="text-white">
               {t('referralSystem')}
             </span>
           </span>
 
-          <ChevronRight className="h-4 w-4 text-gray-500" />
+          <ChevronRight className="h-5 w-5 shrink-0 text-gray-500" />
         </button>
 
         <a
           href="https://t.me/AskSIM_Support"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-between p-3.5 transition-colors hover:bg-gray-800/80"
+          className="flex min-h-[54px] items-center justify-between px-4 py-3 transition-colors hover:bg-gray-800/80"
         >
           <span className="flex items-center gap-3">
-            <MessageSquare className="h-4 w-4 text-brand-400" />
-
+            <MessageSquare className="h-5 w-5 shrink-0 text-brand-400" />
             <span className="text-white">
               {t('support')}
             </span>
           </span>
 
-          <ChevronRight className="h-4 w-4 text-gray-500" />
+          <ChevronRight className="h-5 w-5 shrink-0 text-gray-500" />
         </a>
       </div>
 
       {/* Мои eSIM */}
       <div className="space-y-2 pt-1">
-        <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
+        <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-300">
           <CreditCard className="h-4 w-4" />
           {t('myEsim')}
         </h3>
 
-        <div className="flex flex-col items-center gap-2 rounded-3xl border border-dashed border-gray-700 bg-gray-900/55 px-5 py-8 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-gray-700 bg-gray-900/55 px-5 py-8 text-center">
 
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
             <SimCardIcon className="h-6 w-6" />
           </div>
 
-          <p className="text-sm font-bold text-white">
+          <p className="text-base font-bold text-white">
             {labels.noEsimTitle}
           </p>
 
-          <p className="max-w-xs text-xs leading-relaxed text-gray-400">
+          <p className="max-w-xs text-sm leading-relaxed text-gray-300">
             {labels.noEsimText}
           </p>
         </div>
       </div>
 
-      {/* История заказов */}
+      {/* Мои заказы */}
       <div className="space-y-2 pt-1">
-        <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
+        <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-300">
           <List className="h-4 w-4" />
           {t('myOrders')}
         </h3>
 
-        <div className="flex flex-col items-center gap-2 rounded-3xl border border-dashed border-gray-700 bg-gray-900/55 px-5 py-7 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-gray-700 bg-gray-900/55 px-5 py-7 text-center">
 
-          <ShoppingBag className="h-6 w-6 text-gray-500" />
+          <ShoppingBag className="h-7 w-7 text-gray-400" />
 
-          <p className="text-sm font-bold text-white">
+          <p className="text-base font-bold text-white">
             {labels.noOrdersTitle}
           </p>
 
-          <p className="max-w-xs text-xs leading-relaxed text-gray-400">
+          <p className="max-w-xs text-sm leading-relaxed text-gray-300">
             {labels.noOrdersText}
           </p>
         </div>
       </div>
 
-      {/* Реферальная система */}
+      {/* Реферальная программа */}
       <Modal
         open={referralOpen}
         onClose={() => setReferralOpen(false)}
       >
-
-        {/* Заголовок */}
-        <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-          <h3 className="flex items-center gap-2 text-base font-bold text-white">
-            <UserPlus className="h-5 w-5 text-brand-400" />
+        <div className="flex items-center justify-between gap-3 border-b border-gray-800 pb-3">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-white">
+            <UserPlus className="h-5 w-5 shrink-0 text-brand-400" />
             {t('referralSystem')}
           </h3>
 
@@ -441,45 +432,44 @@ export default function ProfileView({
             <DollarSign className="h-5 w-5" />
           </div>
 
-          <p className="text-xs leading-relaxed text-gray-300">
+          <p className="text-sm leading-relaxed text-gray-200">
             {labels.referralIntro}
           </p>
         </div>
 
-        {/* Демо-предупреждение */}
-        <div className="flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-100">
-          <Info className="mt-0.5 h-4 w-4 shrink-0" />
+        {/* Информация о демо-режиме */}
+        <div className="flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-sm leading-relaxed text-amber-100">
+          <Info className="mt-0.5 h-5 w-5 shrink-0" />
           <span>{labels.referralPreview}</span>
         </div>
 
         {/* Статистика */}
         <div className="grid grid-cols-2 gap-3">
-
-          <div className="flex items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/15 text-brand-400">
-              <Users className="h-4 w-4" />
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-500/15 text-brand-400">
+              <Users className="h-5 w-5" />
             </div>
 
-            <div>
-              <p className="text-[10px] font-semibold text-gray-400">
+            <div className="min-w-0">
+              <p className="break-words text-xs font-semibold text-gray-300">
                 {labels.invited}
               </p>
-              <p className="text-base font-extrabold text-white">
+              <p className="text-lg font-extrabold text-white">
                 —
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
-              <ShoppingBag className="h-4 w-4" />
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+              <ShoppingBag className="h-5 w-5" />
             </div>
 
-            <div>
-              <p className="text-[10px] font-semibold text-gray-400">
+            <div className="min-w-0">
+              <p className="break-words text-xs font-semibold text-gray-300">
                 {labels.purchases}
               </p>
-              <p className="text-base font-extrabold text-white">
+              <p className="text-lg font-extrabold text-white">
                 —
               </p>
             </div>
@@ -487,25 +477,23 @@ export default function ProfileView({
         </div>
 
         {/* Реферальная ссылка */}
-        <div className="space-y-1.5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+        <div className="space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-300">
             {labels.linkLabel}
           </p>
 
-          <div className="flex items-center gap-2 rounded-xl border border-gray-800 bg-gray-900 p-3 text-xs text-gray-500">
-            <LockKeyhole className="h-4 w-4 shrink-0" />
+          <div className="flex items-center gap-2 rounded-xl border border-gray-800 bg-gray-900 p-3.5 text-sm text-gray-300">
+            <LockKeyhole className="h-5 w-5 shrink-0" />
             <span>{labels.linkUnavailable}</span>
           </div>
         </div>
 
         {/* Баланс */}
-        <div className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-900 p-4">
-
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase text-gray-400">
+            <p className="text-xs font-semibold uppercase text-gray-300">
               {labels.balance}
             </p>
-
             <p className="mt-1 text-xl font-extrabold text-gray-500">
               —
             </p>
@@ -514,19 +502,19 @@ export default function ProfileView({
           <button
             type="button"
             disabled
-            className="cursor-not-allowed rounded-xl bg-gray-800 px-4 py-2 text-xs font-bold text-gray-500"
+            className="min-h-[44px] cursor-not-allowed rounded-xl bg-gray-800 px-4 py-2 text-sm font-bold text-gray-500"
           >
             {labels.withdraw}
           </button>
         </div>
 
-        {/* Уровни программы */}
-        <div className="space-y-2 pt-1">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+        {/* Уровни реферальной программы */}
+        <div className="space-y-3 pt-1">
+          <h4 className="text-sm font-bold uppercase tracking-wide text-gray-300">
             {labels.howItWorks}
           </h4>
 
-          <p className="text-xs leading-relaxed text-gray-400">
+          <p className="text-sm leading-relaxed text-gray-300">
             {labels.rewardInfo}
           </p>
 
@@ -549,29 +537,29 @@ export default function ProfileView({
           ].map((item) => (
             <div
               key={item.num}
-              className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-900 p-3"
+              className="flex items-center justify-between gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-3.5"
             >
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <span className="h-2.5 w-2.5 rounded-full bg-gray-600" />
-
-                  {item.num} {labels.level} · {item.percent}%
+              <div className="min-w-0 space-y-1.5">
+                <div className="flex items-center gap-2 text-sm font-bold text-white">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-gray-600" />
+                  <span>
+                    {item.num} {labels.level} · {item.percent}%
+                  </span>
                 </div>
 
-                <span className="ml-[18px] text-[10px] text-gray-500">
+                <p className="ml-[18px] text-xs leading-relaxed text-gray-300">
                   {item.detail}
-                </span>
+                </p>
               </div>
 
               {item.num === 1 && (
-                <span className="rounded-md bg-gray-800 px-2 py-1 text-[10px] font-bold text-gray-400">
+                <span className="shrink-0 rounded-md bg-gray-800 px-2 py-1 text-xs font-bold text-gray-400">
                   {labels.current}
                 </span>
               )}
             </div>
           ))}
         </div>
-
       </Modal>
     </section>
   );
