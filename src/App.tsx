@@ -216,21 +216,25 @@ export default function App() {
         />
       )}
 
-      {checkout && (
-        <CheckoutModal
-          open={true}
-          country={checkout.country}
-          tariff={checkout.tariff}
-          currency={currency}
-          onClose={closeCheckout}
-          onPaySuccess={() => {
-            // Frontend-only demonstration: no charge and no eSIM issuance.
-            setDemoOrder(checkout);
-            setCheckout(null);
-          }}
-          onShowToast={showToast}
-        />
-      )}
+      
+{checkout && (
+  <CheckoutModal
+    open={true}
+    country={checkout.country}
+    tariff={checkout.tariff}
+    currency={currency}
+    lang={lang}
+    t={t}
+    onClose={closeCheckout}
+    onPaySuccess={() => {
+      // Демонстрационный режим: реальная оплата не производится.
+      setDemoOrder(checkout);
+      setCheckout(null);
+    }}
+    onShowToast={showToast}
+  />
+)}
+
 
       <CompatModal
   open={compatOpen}
