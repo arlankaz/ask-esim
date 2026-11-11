@@ -117,26 +117,36 @@ export default function App() {
     setToast({ message, variant });
   }, []);
 
-  const visibleCountries = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase();
-    const region = REGION_BY_CATEGORY[category];
+  
+const visibleCountries = useMemo(() => {
+  const query = search.trim().toLocaleLowerCase();
+  const region = REGION_BY_CATEGORY[category];
 
-    return countriesData.filter((country) => {
-      const translatedName =
-        translations[lang]?.[country.id.toLowerCase()] ??
-        translations[lang]?.[country.name.toLowerCase()] ??
-        country.name;
-      const matchesSearch =
-        !query ||
+  return countriesData.filter((country) => {
+    const translatedName =
+      translations[lang]?.[country.id.toLowerCase()] ??
+      translations[lang]?.[country.name.toLowerCase()] ??
+      country.name;
+
+    // Когда пользователь вводит текст,
+    // ищем по всем странам без ограничения региона.
+    if (query) {
+      return (
         country.name.toLocaleLowerCase().includes(query) ||
-        translatedName.toLocaleLowerCase().includes(query);
-      const matchesCategory =
-        category === 'global' ||
-        (category === 'popular' ? country.popular : country.region === region);
+        country.id.toLocaleLowerCase().includes(query) ||
+        translatedName.toLocaleLowerCase().includes(query)
+      );
+    }
 
-      return matchesSearch && matchesCategory;
-    });
-  }, [search, category, lang]);
+    // Когда поиск пустой, применяем выбранную категорию.
+    return (
+      category === 'global' ||
+      (category === 'popular'
+        ? country.popular
+        : country.region === region)
+    );
+  });
+}, [search, category, lang]);
 
   const closeCheckout = useCallback(() => {
     if (checkout) {
