@@ -1,5 +1,5 @@
 
-import { Wifi, User } from 'lucide-react';
+import { ShoppingCart, User } from 'lucide-react';
 
 type Tab = 'home' | 'profile';
 
@@ -14,12 +14,12 @@ export default function NavBar({
 }: NavBarProps) {
   return (
     <nav
-      aria-label="Main navigation"
+      aria-label="Главная навигация"
       className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 px-4"
     >
       <div className="glass-header pointer-events-auto mx-auto flex w-full max-w-[300px] items-center gap-2 rounded-full border border-gray-800/90 bg-gray-900/90 p-1.5 shadow-2xl">
 
-        {/* eSIM */}
+        {/* Магазин */}
         <button
           type="button"
           onClick={() => onChange('home')}
@@ -30,8 +30,8 @@ export default function NavBar({
               : 'text-gray-400 hover:bg-gray-800 hover:text-white'
           }`}
         >
-          <Wifi className="h-5 w-5 shrink-0" />
-          <span>eSIM</span>
+          <ShoppingCart className="h-5 w-5 shrink-0" />
+          <span>Магазин</span>
         </button>
 
         {/* Profile */}
