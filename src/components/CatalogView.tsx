@@ -1,17 +1,31 @@
-import React from 'react';
+import { ArrowUpRight, ChevronRight, Search, Smartphone } from 'lucide-react';
 import type { Country, Currency } from '../types';
+import { USD_RATE } from '../types';
 
 interface CatalogViewProps {
   search: string;
-  setSearch: (s: string) => void;
+  setSearch: (value: string) => void;
   category: string;
-  setCategory: (c: string) => void;
+  setCategory: (value: string) => void;
   countries: Country[];
   currency: Currency;
   onSelectCountry: (country: Country) => void;
   onOpenCompat: () => void;
   t?: (key: string) => string;
 }
+
+const CATEGORIES = [
+  'popular',
+  'europe',
+  'asia',
+  'middleEast',
+  'america',
+  'africa',
+  'global',
+] as const;
+
+// Keep in sync with TariffModal's demo pricing until a shared pricing module is introduced.
+const DEMO_PRICE_MULTIPLIER = 2.5;
 
 export default function CatalogView({
   search,
@@ -22,136 +36,134 @@ export default function CatalogView({
   currency,
   onSelectCountry,
   onOpenCompat,
-  t = (k) => k,
+  t = (key) => key,
 }: CatalogViewProps) {
-  const categories = [
-    { id: 'popular', label: t('popular') || '🔥 Популярные' },
-    { id: 'europe', label: t('europe') || 'Европа' },
-    { id: 'asia', label: t('asia') || 'Азия' },
-    { id: 'middleEast', label: t('middleEast') || 'Ближний Восток' },
-    { id: 'america', label: t('america') || 'Америка' },
-    { id: 'africa', label: t('africa') || 'Африка' },
-    { id: 'global', label: t('global') || 'Весь мир' },
-  ];
+  const countryName = (country: Country): string => {
+    const idKey = country.id.toLowerCase();
+    const translatedById = t(idKey);
+    if (translatedById !== idKey) return translatedById;
+
+    const nameKey = country.name.toLowerCase();
+    const translatedByName = t(nameKey);
+    return translatedByName !== nameKey ? translatedByName : country.name;
+  };
+
+  const priceFrom = (country: Country): string => {
+    const priceKzt = Math.round(country.startUsd * USD_RATE * DEMO_PRICE_MULTIPLIER);
+    return currency === 'KZT'
+      ? `${priceKzt.toLocaleString('ru-RU')} ₸`
+      : `$${(priceKzt / USD_RATE).toFixed(2)}`;
+  };
 
   return (
-    <div className="px-4 pt-4 space-y-5">
-      {/* Поисковая строка */}
+    <section className="mx-auto w-full max-w-2xl space-y-5 px-4 pb-5 pt-4">
+      {/* Search */}
       <div className="relative">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('searchPlaceholder') || 'Куда летите? ✈️ (например: Турция)'}
-          className="w-full py-3 pl-10 pr-4 bg-slate-800/90 border border-slate-700/80 rounded-2xl text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 transition shadow-inner"
+        <Search
+          aria-hidden="true"
+          className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400"
         />
-        <svg
-          className="w-5 h-5 absolute left-3.5 top-3.5 text-slate-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder={t('searchPlaceholder')}
+          aria-label={t('searchPlaceholder')}
+          className="w-full rounded-2xl border border-slate-700/80 bg-slate-800/80 py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-slate-400 outline-none transition-colors focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15"
+        />
       </div>
 
-      {/* Категории (все 7 регионов) */}
-      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-        {categories.map((cat) => (
+      {/* Scrollable categories */}
+      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1" role="group" aria-label={t('travelDestinations')}>
+        {CATEGORIES.map((id) => (
           <button
-            key={cat.id}
-            onClick={() => setCategory(cat.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-              category === cat.id
-                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
-                : 'bg-slate-800/80 text-slate-300 border border-slate-700/50 hover:bg-slate-700'
+            key={id}
+            type="button"
+            onClick={() => setCategory(id)}
+            aria-pressed={category === id}
+            className={`shrink-0 rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition-colors active:scale-[0.98] ${
+              category === id
+                ? 'border-cyan-400/70 bg-cyan-500 text-white shadow-md shadow-cyan-500/15'
+                : 'border-slate-700/70 bg-slate-800/70 text-slate-300 hover:border-slate-500 hover:text-white'
             }`}
           >
-            {cat.label}
+            {t(id)}
           </button>
         ))}
       </div>
 
-      {/* Заголовок секции */}
-      
-<div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-  <span className="uppercase tracking-wider">
-    {t('travelDestinations')}
-  </span>
-  <span>
-    {countries.length} {t('countriesCount')}
-  </span>
-</div>
+      {/* Section heading */}
+      <div className="flex items-end justify-between gap-3">
+        <h2 className="min-w-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-300">
+          {t('travelDestinations')}
+        </h2>
+        <span className="shrink-0 text-xs font-medium tabular-nums text-slate-400">
+          {countries.length} {t('countriesCount')}
+        </span>
+      </div>
 
-
-      {/* Сетка стран */}
+      {/* Country cards */}
       {countries.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {countries.map((country) => (
-            <div
+            <button
               key={country.id}
+              type="button"
               onClick={() => onSelectCountry(country)}
-              className="group relative bg-slate-800/60 border border-slate-700/60 hover:border-cyan-500/50 rounded-2xl p-3.5 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex flex-col justify-between h-32"
+              aria-label={`${countryName(country)}, ${t('from')} ${priceFrom(country)}`}
+              className="group flex min-h-[150px] min-w-0 flex-col justify-between rounded-[20px] border border-slate-700/70 bg-gradient-to-b from-slate-800/95 to-slate-900/90 p-3.5 text-left shadow-md shadow-black/10 transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-950/20 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">{country.flag}</span>
+              <div className="flex items-start justify-between gap-2">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/5 bg-white/5 text-[27px] leading-none" aria-hidden="true">
+                  {country.flag}
+                </span>
+                <ArrowUpRight
+                  aria-hidden="true"
+                  className="h-4 w-4 text-slate-500 transition-colors group-hover:text-cyan-400"
+                />
               </div>
-
-              <div>
-                <h3 className="font-bold text-sm text-white group-hover:text-cyan-400 transition">
-                  {t(country.id.toLowerCase()) === country.id.toLowerCase()
-  ? country.name
-  : t(country.id.toLowerCase())}
+              <div className="min-w-0 space-y-1.5 pt-3">
+                <h3 className="break-words text-[13px] font-bold leading-snug text-white transition-colors group-hover:text-cyan-300">
+                  {countryName(country)}
                 </h3>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-[11px] text-slate-400">
+                <div className="flex items-center justify-between gap-1.5">
+                  <p className="min-w-0 text-[11px] leading-tight text-slate-400">
                     {t('from')}{' '}
-                    <strong className="text-white">
-                      {currency === 'KZT'
-  ? `${Math.round(country.startUsd * 500 * 2.5)
-      .toLocaleString('ru-RU')} ₸`
-  : `$${(country.startUsd * 2.5).toFixed(2)}`}
-                    </strong>
-                  </span>
-                  <div className="w-5 h-5 rounded-full bg-slate-700/60 flex items-center justify-center text-slate-300 group-hover:bg-cyan-500 group-hover:text-white transition">
-                    →
-                  </div>
+                    <span className="font-bold tabular-nums text-cyan-300">{priceFrom(country)}</span>
+                  </p>
+                  <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-500 transition-transform group-hover:translate-x-0.5 group-hover:text-white" />
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       ) : (
-        <div className="py-12 text-center bg-slate-800/40 rounded-2xl border border-slate-700/40">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-700/40 flex items-center justify-center text-slate-400">
-            🔍
-          </div>
-          <p className="text-sm text-slate-300 font-medium">Страна не найдена</p>
-          <p className="text-xs text-slate-500 mt-1">Попробуйте изменить запрос</p>
+        <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-800/40 px-5 py-12 text-center">
+          <Search aria-hidden="true" className="mx-auto mb-3 h-8 w-8 text-slate-500" />
+          <p className="text-sm font-semibold text-slate-300">{t('noResults') === 'noResults' ? 'Страна не найдена' : t('noResults')}</p>
+          <p className="mt-1 text-xs text-slate-500">{t('tryAnotherSearch') === 'tryAnotherSearch' ? 'Попробуйте изменить запрос' : t('tryAnotherSearch')}</p>
         </div>
       )}
 
-      {/* Баннер проверки совместимости */}
-      <div
+      {/* Compatibility information */}
+      <button
+        type="button"
         onClick={onOpenCompat}
-        className="p-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700/80 flex items-center justify-between cursor-pointer hover:border-cyan-500/40 transition"
+        className="group flex w-full items-center gap-3 rounded-2xl border border-slate-700/70 bg-slate-800/60 p-4 text-left transition-colors hover:border-cyan-500/40 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-            📱
-          </div>
-          <div>
-            <h4 className="text-xs font-bold text-white">Работает ли eSIM на моем телефоне?</h4>
-            <p className="text-[11px] text-slate-400">Инструкция проверки iOS / Android</p>
-          </div>
-        </div>
-        <span className="text-slate-400 text-sm">›</span>
-      </div>
-    </div>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
+          <Smartphone aria-hidden="true" className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs font-bold leading-snug text-white">
+            {t('compatibilityTitle') === 'compatibilityTitle' ? 'Работает ли eSIM на моём телефоне?' : t('compatibilityTitle')}
+          </span>
+          <span className="mt-1 block text-[11px] text-slate-400">
+            {t('compatibilitySubtitle') === 'compatibilitySubtitle' ? 'Инструкция для iOS и Android' : t('compatibilitySubtitle')}
+          </span>
+        </span>
+        <ChevronRight aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-500 transition-transform group-hover:translate-x-0.5" />
+      </button>
+    </section>
   );
 }
