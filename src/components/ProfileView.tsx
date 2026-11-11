@@ -1,18 +1,10 @@
 import { useState } from 'react';
 import {
-  UserPlus,
-  MessageSquare,
-  ChevronRight,
-  CreditCard,
-  List,
-  Copy,
-  DollarSign,
-  Users,
-  ShoppingCart,
-  X,
+  UserRound, UserPlus, MessageSquare, ChevronRight, CreditCard,
+  List, SimCard, ShoppingBag, DollarSign, Users, X, LockKeyhole,
+  Info,
 } from 'lucide-react';
 import Modal from './Modal';
-import { copyToClipboard } from '../utils';
 import type { Language } from './translations';
 
 interface ProfileViewProps {
@@ -23,305 +15,200 @@ interface ProfileViewProps {
   lang: Language;
 }
 
-// Тексты, которых пока нет в общем словаре translations.ts.
-// Позже их можно перенести туда без изменения разметки профиля.
-const profileLabels = {
+type ProfileText = {
+  guest: string;
+  subtitle: string;
+  preview: string;
+  noEsimTitle: string;
+  noEsimText: string;
+  noOrdersTitle: string;
+  noOrdersText: string;
+  referralIntro: string;
+  referralPreview: string;
+  invited: string;
+  purchases: string;
+  linkLabel: string;
+  linkUnavailable: string;
+  balance: string;
+  withdraw: string;
+  howItWorks: string;
+  rewardInfo: string;
+  level: string;
+  baseLevel: string;
+  current: string;
+  invite10: string;
+  invite30: string;
+};
+
+const copy: Record<Language, ProfileText> = {
   ru: {
-    copyDone: 'Скопировано в буфер', linkCopied: 'Ссылка скопирована',
-    referralDescription: 'Приглашайте других и начните получать дополнительный доход. Чем выше уровень — тем больше процент от нашей чистой прибыли.',
-    invited: 'Приглашено', purchases: 'Покупки', yourLink: 'Ваша ссылка:',
-    available: 'Доступно к выводу', minWithdrawal: 'Вывод от $10', request: 'Запросить',
-    howItWorks: 'Как это работает',
-    levelDescription: 'Каждый уровень даёт процент от нашей чистой прибыли с покупок приглашённых. Уровень повысится после выполнения условий.',
-    basicLevel: 'Базовый уровень', yours: 'ВАШ', invite10: 'Пригласить 10 человек', invite30: 'Пригласить 30 человек',
-    userLabel: 'Пользователь A-Mobile Global eSIM',
+    guest: 'Гость', subtitle: 'Профиль A-Mobile eSIM', preview: 'Предварительный просмотр',
+    noEsimTitle: 'Пока нет eSIM', noEsimText: 'После подключения заказов здесь появятся ваш eSIM и остаток интернета.',
+    noOrdersTitle: 'Заказов пока нет', noOrdersText: 'История покупок появятся здесь после запуска оформления заказов.',
+    referralIntro: 'Приглашайте других и начните получать дополнительный доход. Чем выше уровень — тем больше процент от нашей чистой прибыли.',
+    referralPreview: 'Реферальная программа находится в разработке. Ссылки, начисления и выплаты пока недоступны.',
+    invited: 'Приглашено', purchases: 'Покупки', linkLabel: 'Ваша реферальная ссылка',
+    linkUnavailable: 'Будет доступна после запуска', balance: 'Доступно к выводу', withdraw: 'Запросить',
+    howItWorks: 'Уровни программы — пример', rewardInfo: 'Проценты и условия показаны для демонстрации дизайна. Окончательные правила будут опубликованы перед запуском.',
+    level: 'Уровень', baseLevel: 'Базовый уровень', current: 'ДЕМО', invite10: 'Пригласить 10 человек', invite30: 'Пригласить 30 человек',
   },
   en: {
-    copyDone: 'Copied to clipboard', linkCopied: 'Link copied',
-    referralDescription: 'Invite others and earn rewards. The higher your level, the larger your share of our net profit.',
-    invited: 'Invited', purchases: 'Purchases', yourLink: 'Your link:',
-    available: 'Available to withdraw', minWithdrawal: 'Minimum withdrawal $10', request: 'Request',
-    howItWorks: 'How it works',
-    levelDescription: 'Each level earns a share of our net profit from purchases by your referrals. Complete the requirements to level up.',
-    basicLevel: 'Basic level', yours: 'YOURS', invite10: 'Invite 10 people', invite30: 'Invite 30 people',
-    userLabel: 'A-Mobile Global eSIM user',
+    guest: 'Guest', subtitle: 'A-Mobile eSIM profile', preview: 'Preview mode',
+    noEsimTitle: 'No eSIMs yet', noEsimText: 'Once orders are connected, your eSIMs, QR codes and data balance will appear here.',
+    noOrdersTitle: 'No orders yet', noOrdersText: 'Purchase history and receipts will appear here when ordering is launched.',
+    referralIntro: 'Invite friends and earn rewards on their purchases.',
+    referralPreview: 'The referral program is in development. Links, rewards and payouts are not available yet.',
+    invited: 'Invited', purchases: 'Purchases', linkLabel: 'Your referral link',
+    linkUnavailable: 'Available after launch', balance: 'Available to withdraw', withdraw: 'Request',
+    howItWorks: 'Sample referral levels', rewardInfo: 'Percentages and requirements are only design examples. Final terms will be published before launch.',
+    level: 'Level', baseLevel: 'Basic level', current: 'DEMO', invite10: 'Invite 10 people', invite30: 'Invite 30 people',
   },
   kk: {
-    copyDone: 'Алмасу буферіне көшірілді', linkCopied: 'Сілтеме көшірілді',
-    referralDescription: 'Достарыңызды шақырып, қосымша табыс табыңыз. Деңгейіңіз жоғарылаған сайын таза пайдамыздан алатын үлесіңіз өседі.',
-    invited: 'Шақырылғандар', purchases: 'Сатып алулар', yourLink: 'Сілтемеңіз:',
-    available: 'Шешіп алуға қолжетімді', minWithdrawal: 'Ең аз сома — $10', request: 'Сұрау',
-    howItWorks: 'Қалай жұмыс істейді',
-    levelDescription: 'Әр деңгей шақырылғандардың сатып алуларынан түскен таза пайдамыздың белгілі бір үлесін береді. Шарттарды орындап, деңгейіңізді көтеріңіз.',
-    basicLevel: 'Бастапқы деңгей', yours: 'СІЗДІКІ', invite10: '10 адам шақыру', invite30: '30 адам шақыру',
-    userLabel: 'A-Mobile Global eSIM пайдаланушысы',
+    guest: 'Қонақ', subtitle: 'A-Mobile eSIM профилі', preview: 'Алдын ала қарау',
+    noEsimTitle: 'Әзірге eSIM жоқ', noEsimText: 'Тапсырыстар қосылғаннан кейін eSIM, QR-кодтар және интернет қалдығы осында көрінеді.',
+    noOrdersTitle: 'Әзірге тапсырыс жоқ', noOrdersText: 'Сатып алу тарихы мен түбіртектер тапсырыс беру іске қосылғаннан кейін осында шығады.',
+    referralIntro: 'Достарыңызды шақырып, олардың сатып алуларынан сыйақы алыңыз.',
+    referralPreview: 'Рефералдық бағдарлама әзірленуде. Сілтемелер, есептеулер және төлемдер әзірге қолжетімсіз.',
+    invited: 'Шақырылғандар', purchases: 'Сатып алулар', linkLabel: 'Рефералдық сілтемеңіз',
+    linkUnavailable: 'Іске қосылғаннан кейін қолжетімді', balance: 'Шығаруға қолжетімді', withdraw: 'Сұрау',
+    howItWorks: 'Деңгейлердің үлгісі', rewardInfo: 'Пайыздар мен шарттар тек дизайн үлгісі. Нақты ережелер іске қосылар алдында жарияланады.',
+    level: 'Деңгей', baseLevel: 'Бастапқы деңгей', current: 'ДЕМО', invite10: '10 адам шақыру', invite30: '30 адам шақыру',
   },
   uz: {
-    copyDone: 'Buferga nusxalandi', linkCopied: 'Havola nusxalandi',
-    referralDescription: 'Do‘stlaringizni taklif qiling va qo‘shimcha daromad oling. Darajangiz oshgan sari sof foydamizdan ulushingiz ko‘payadi.',
-    invited: 'Taklif qilinganlar', purchases: 'Xaridlar', yourLink: 'Havolangiz:',
-    available: 'Yechib olish mumkin', minWithdrawal: 'Eng kam yechish — $10', request: 'So‘rov yuborish',
-    howItWorks: 'Qanday ishlaydi',
-    levelDescription: 'Har bir daraja taklif qilinganlarning xaridlaridan tushgan sof foydamizdan ulush beradi. Shartlarni bajarib, darajangizni oshiring.',
-    basicLevel: 'Boshlang‘ich daraja', yours: 'SIZNIKI', invite10: '10 kishini taklif qiling', invite30: '30 kishini taklif qiling',
-    userLabel: 'A-Mobile Global eSIM foydalanuvchisi',
+    guest: 'Mehmon', subtitle: 'A-Mobile eSIM profili', preview: 'Ko‘rib chiqish rejimi',
+    noEsimTitle: 'Hozircha eSIM yo‘q', noEsimText: 'Buyurtmalar ulangach, eSIM, QR-kodlar va internet qoldig‘i shu yerda ko‘rinadi.',
+    noOrdersTitle: 'Hozircha buyurtmalar yo‘q', noOrdersText: 'Xaridlar tarixi va cheklar buyurtma xizmati ishga tushgach shu yerda ko‘rinadi.',
+    referralIntro: 'Do‘stlaringizni taklif qiling va xaridlaridan mukofot oling.',
+    referralPreview: 'Referal dasturi ishlab chiqilmoqda. Havolalar, mukofotlar va to‘lovlar hozircha mavjud emas.',
+    invited: 'Taklif qilinganlar', purchases: 'Xaridlar', linkLabel: 'Referal havolangiz',
+    linkUnavailable: 'Ishga tushgandan keyin mavjud', balance: 'Yechish mumkin', withdraw: 'So‘rov yuborish',
+    howItWorks: 'Darajalar namunasi', rewardInfo: 'Foizlar va shartlar faqat dizayn namunasi. Yakuniy qoidalar ishga tushishdan oldin e’lon qilinadi.',
+    level: 'Daraja', baseLevel: 'Boshlang‘ich daraja', current: 'DEMO', invite10: '10 kishini taklif qilish', invite30: '30 kishini taklif qilish',
   },
   uk: {
-    copyDone: 'Скопійовано до буфера', linkCopied: 'Посилання скопійовано',
-    referralDescription: 'Запрошуйте друзів та отримуйте додатковий дохід. Що вищий рівень, то більша ваша частка нашого чистого прибутку.',
-    invited: 'Запрошено', purchases: 'Покупки', yourLink: 'Ваше посилання:',
-    available: 'Доступно до виведення', minWithdrawal: 'Виведення від $10', request: 'Запросити',
-    howItWorks: 'Як це працює',
-    levelDescription: 'Кожен рівень дає частку нашого чистого прибутку від покупок запрошених. Виконайте умови, щоб підвищити рівень.',
-    basicLevel: 'Базовий рівень', yours: 'ВАШ', invite10: 'Запросити 10 людей', invite30: 'Запросити 30 людей',
-    userLabel: 'Користувач A-Mobile Global eSIM',
+    guest: 'Гість', subtitle: 'Профіль A-Mobile eSIM', preview: 'Попередній перегляд',
+    noEsimTitle: 'Поки немає eSIM', noEsimText: 'Після підключення замовлень тут з’являться eSIM, QR-коди та залишок інтернету.',
+    noOrdersTitle: 'Замовлень поки немає', noOrdersText: 'Історія покупок і чеки з’являться тут після запуску оформлення замовлень.',
+    referralIntro: 'Запрошуйте друзів та отримуйте винагороди за їхні покупки.',
+    referralPreview: 'Реферальна програма розробляється. Посилання, нарахування та виплати поки недоступні.',
+    invited: 'Запрошено', purchases: 'Покупки', linkLabel: 'Ваше реферальне посилання',
+    linkUnavailable: 'Буде доступне після запуску', balance: 'Доступно до виведення', withdraw: 'Запросити',
+    howItWorks: 'Приклад рівнів програми', rewardInfo: 'Відсотки й умови наведено лише для демонстрації дизайну. Остаточні правила опублікуємо перед запуском.',
+    level: 'Рівень', baseLevel: 'Базовий рівень', current: 'ДЕМО', invite10: 'Запросити 10 людей', invite30: 'Запросити 30 людей',
   },
   de: {
-    copyDone: 'In die Zwischenablage kopiert', linkCopied: 'Link kopiert',
-    referralDescription: 'Lade Freunde ein und verdiene zusätzlich. Je höher deine Stufe, desto größer dein Anteil an unserem Nettogewinn.',
-    invited: 'Eingeladen', purchases: 'Käufe', yourLink: 'Dein Link:',
-    available: 'Zur Auszahlung verfügbar', minWithdrawal: 'Auszahlung ab 10 $', request: 'Anfordern',
-    howItWorks: 'So funktioniert es',
-    levelDescription: 'Jede Stufe gibt dir einen Anteil an unserem Nettogewinn aus Käufen deiner Empfehlungen. Erfülle die Bedingungen, um aufzusteigen.',
-    basicLevel: 'Basisstufe', yours: 'DEINE', invite10: '10 Personen einladen', invite30: '30 Personen einladen',
-    userLabel: 'A-Mobile Global eSIM Nutzer',
+    guest: 'Gast', subtitle: 'A-Mobile eSIM Profil', preview: 'Vorschaumodus',
+    noEsimTitle: 'Noch keine eSIMs', noEsimText: 'Sobald Bestellungen verfügbar sind, erscheinen hier deine eSIMs, QR-Codes und dein Datenvolumen.',
+    noOrdersTitle: 'Noch keine Bestellungen', noOrdersText: 'Kaufverlauf und Belege erscheinen hier nach dem Start des Bestellsystems.',
+    referralIntro: 'Lade Freunde ein und erhalte Prämien für ihre Einkäufe.',
+    referralPreview: 'Das Empfehlungsprogramm wird entwickelt. Links, Prämien und Auszahlungen sind noch nicht verfügbar.',
+    invited: 'Eingeladen', purchases: 'Käufe', linkLabel: 'Dein Empfehlungslink',
+    linkUnavailable: 'Nach dem Start verfügbar', balance: 'Zur Auszahlung verfügbar', withdraw: 'Anfordern',
+    howItWorks: 'Beispielhafte Programmstufen', rewardInfo: 'Prozentsätze und Bedingungen dienen nur der Designvorschau. Die endgültigen Regeln werden vor dem Start veröffentlicht.',
+    level: 'Stufe', baseLevel: 'Basisstufe', current: 'DEMO', invite10: '10 Personen einladen', invite30: '30 Personen einladen',
   },
-} as const;
+};
 
-export default function ProfileView({
-  onShowToast,
-  onSelectCountryById,
-  onShowActiveQR,
-  t,
-  lang,
-}: ProfileViewProps) {
+// Telegram data is used only to personalize the display. It is NOT authentication.
+function getTelegramDisplayName(): string | null {
+  if (typeof window === 'undefined') return null;
+  const tgWindow = window as Window & {
+    Telegram?: { WebApp?: { initDataUnsafe?: { user?: { first_name?: string; last_name?: string; username?: string } } } };
+  };
+  const user = tgWindow.Telegram?.WebApp?.initDataUnsafe?.user;
+  if (!user) return null;
+  const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+  return fullName || (user.username ? `@${user.username}` : null);
+}
+
+export default function ProfileView({ t, lang }: ProfileViewProps) {
   const [referralOpen, setReferralOpen] = useState(false);
-  const labels = profileLabels[lang] ?? profileLabels.ru;
-
-  const refLink = 't.me/askesim_bot?startapp=ref_user982';
+  const labels = copy[lang] ?? copy.ru;
+  const telegramName = getTelegramDisplayName();
+  const displayName = telegramName || labels.guest;
+  const initial = displayName.slice(0, 1).toLocaleUpperCase() || 'A';
 
   return (
-    <section className="space-y-4 fade-in">
-      <div className="bg-gray-900/90 border border-gray-800 rounded-3xl p-4 flex items-center justify-between shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-brand-500 to-brand-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg">
-            <span>T</span>
+    <section className="mx-auto w-full max-w-2xl space-y-4 px-4 pb-6 pt-4 fade-in">
+      <div className="flex items-center justify-between gap-3 rounded-3xl border border-gray-800 bg-gray-900/90 p-4 shadow-xl">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-brand-500 to-brand-600 text-lg font-extrabold text-white shadow-lg">
+            {telegramName ? initial : <UserRound className="h-6 w-6" aria-hidden="true" />}
           </div>
-          <div>
-            <h2 className="font-extrabold text-white text-base leading-tight">TommyHellaTiger</h2>
-            <p className="text-[10px] text-gray-400">{labels.userLabel}</p>
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-extrabold leading-tight text-white">{displayName}</h2>
+            <p className="mt-1 text-[11px] text-gray-400">{labels.subtitle}</p>
           </div>
         </div>
-        <span className="bg-gray-700 text-white text-xs font-extrabold px-3 py-1 rounded-full shadow-md">
-          1 {t('level')}
-        </span>
+        <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-bold text-cyan-300">{labels.preview}</span>
       </div>
 
-      <div className="bg-gray-900/90 border border-gray-800 rounded-3xl divide-y divide-gray-800/70 overflow-hidden text-xs font-semibold">
-        <button
-          onClick={() => setReferralOpen(true)}
-          className="w-full p-3.5 flex items-center justify-between hover:bg-gray-850 cursor-pointer transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <UserPlus className="w-4 h-4 text-brand-400" />
-            <span className="text-white">{t('referralSystem')}</span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-gray-600" />
+      <div className="overflow-hidden rounded-3xl border border-gray-800 bg-gray-900/90 text-xs font-semibold divide-y divide-gray-800/70">
+        <button type="button" onClick={() => setReferralOpen(true)} className="flex w-full items-center justify-between p-3.5 text-left transition-colors hover:bg-gray-800/80">
+          <span className="flex items-center gap-3"><UserPlus className="h-4 w-4 text-brand-400"/><span className="text-white">{t('referralSystem')}</span></span>
+          <ChevronRight className="h-4 w-4 text-gray-500"/>
         </button>
-
-        <a
-          href="https://t.me/AskSIM_Support"
-          target="_blank"
-          rel="noreferrer"
-          className="p-3.5 flex items-center justify-between hover:bg-gray-850 cursor-pointer transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <MessageSquare className="w-4 h-4 text-brand-400" />
-            <span className="text-white">{t('support')}</span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-gray-600" />
+        <a href="https://t.me/AskSIM_Support" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3.5 transition-colors hover:bg-gray-800/80">
+          <span className="flex items-center gap-3"><MessageSquare className="h-4 w-4 text-brand-400"/><span className="text-white">{t('support')}</span></span>
+          <ChevronRight className="h-4 w-4 text-gray-500"/>
         </a>
       </div>
 
       <div className="space-y-2 pt-1">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-          <CreditCard className="w-3.5 h-3.5" />
-          <span>{t('myEsim')}</span>
-        </h3>
-
-        <div className="space-y-3">
-          <div className="bg-gray-900 border border-gray-800 rounded-3xl p-4 space-y-3.5 shadow-xl relative overflow-hidden">
-            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl">🇹🇷</span>
-                <div>
-                  <h3 className="font-bold text-white text-sm">{t('tr')} 5 GB</h3>
-                  <p className="text-[10px] text-emerald-400 font-medium">● {t('active')}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  copyToClipboard('LPA:1$rsp.truphone.com$ASK-TR-5GB-982314');
-                  onShowToast(labels.copyDone);
-                }}
-                className="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-[10px] font-semibold flex items-center gap-1 transition-colors"
-              >
-                <Copy className="w-3 h-3" />
-                <span>{t('lpaCode')}</span>
-              </button>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-gray-400">{t('remainingTraffic')}</span>
-                <span className="text-white">3.8 GB / 5.0 GB</span>
-              </div>
-              <div className="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-brand-500 to-emerald-400 rounded-full"
-                  style={{ width: '76%' }}
-                />
-              </div>
-              <p className="text-[10px] text-gray-500 text-right">{t('validFor')} 24 {t('days')}</p>
-            </div>
-
-            <div className="pt-1 flex gap-2">
-              <button
-                onClick={() => onSelectCountryById('TR')}
-                className="flex-1 py-2 bg-brand-500/15 hover:bg-brand-500/25 text-brand-400 border border-brand-500/30 rounded-xl text-xs font-bold transition-all"
-              >
-                {t('extendTraffic')}
-              </button>
-              <button onClick={onShowActiveQR} className="py-2 px-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-semibold">
-                {t('showQr')}
-              </button>
-            </div>
-          </div>
+        <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400"><CreditCard className="h-4 w-4" />{t('myEsim')}</h3>
+        <div className="flex flex-col items-center gap-2 rounded-3xl border border-dashed border-gray-700 bg-gray-900/55 px-5 py-8 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400"><SimCard className="h-6 w-6"/></div>
+          <p className="text-sm font-bold text-white">{labels.noEsimTitle}</p>
+          <p className="max-w-xs text-xs leading-relaxed text-gray-400">{labels.noEsimText}</p>
         </div>
       </div>
 
       <div className="space-y-2 pt-1">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-          <List className="w-3.5 h-3.5" />
-          <span>{t('myOrders')}</span>
-        </h3>
-        <div className="bg-gray-900/40 border border-dashed border-gray-800 rounded-3xl py-6 text-center text-xs text-gray-500">
-          {t('emptyHistory')}
+        <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400"><List className="h-4 w-4" />{t('myOrders')}</h3>
+        <div className="flex flex-col items-center gap-2 rounded-3xl border border-dashed border-gray-700 bg-gray-900/55 px-5 py-7 text-center">
+          <ShoppingBag className="h-6 w-6 text-gray-500"/>
+          <p className="text-sm font-bold text-white">{labels.noOrdersTitle}</p>
+          <p className="max-w-xs text-xs leading-relaxed text-gray-400">{labels.noOrdersText}</p>
         </div>
       </div>
 
       <Modal open={referralOpen} onClose={() => setReferralOpen(false)}>
         <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-          <h3 className="font-bold text-base text-white flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-brand-400" />
-            <span>{t('referralSystem')}</span>
-          </h3>
-          <button
-            onClick={() => setReferralOpen(false)}
-            className="p-2 bg-gray-900 rounded-full text-gray-400 hover:text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <h3 className="flex items-center gap-2 text-base font-bold text-white"><UserPlus className="h-5 w-5 text-brand-400" />{t('referralSystem')}</h3>
+          <button type="button" aria-label="Close" onClick={() => setReferralOpen(false)} className="rounded-full bg-gray-900 p-2 text-gray-400 hover:text-white"><X className="h-5 w-5"/></button>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-start gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <DollarSign className="w-5 h-5" />
-          </div>
-          <p className="text-xs text-gray-300 leading-relaxed">
-            {labels.referralDescription}
-          </p>
+        <div className="flex items-start gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400"><DollarSign className="h-5 w-5" /></div>
+          <p className="text-xs leading-relaxed text-gray-300">{labels.referralIntro}</p>
         </div>
+        <div className="flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-100"><Info className="mt-0.5 h-4 w-4 shrink-0"/><span>{labels.referralPreview}</span></div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-brand-500/15 text-brand-400 flex items-center justify-center">
-              <Users className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[10px] text-gray-400 font-semibold">{labels.invited}</p>
-              <p className="text-base font-extrabold text-white">0</p>
-            </div>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-              <ShoppingCart className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[10px] text-gray-400 font-semibold">{labels.purchases}</p>
-              <p className="text-base font-extrabold text-white">0</p>
-            </div>
-          </div>
+          <div className="flex items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-3"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500/15 text-brand-400"><Users className="h-4 w-4"/></div><div><p className="text-[10px] font-semibold text-gray-400">{labels.invited}</p><p className="text-base font-extrabold text-white">—</p></div></div>
+          <div className="flex items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900 p-3"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400"><ShoppingBag className="h-4 w-4"/></div><div><p className="text-[10px] font-semibold text-gray-400">{labels.purchases}</p><p className="text-base font-extrabold text-white">—</p></div></div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{labels.yourLink}</label>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              readOnly
-              value={refLink}
-              className="bg-gray-900 text-xs text-gray-300 font-mono p-3 rounded-xl border border-gray-800 w-full select-all"
-            />
-            <button
-              onClick={() => {
-                copyToClipboard(refLink);
-                onShowToast(labels.linkCopied);
-              }}
-              className="p-3 bg-gray-900 hover:bg-gray-800 border border-gray-800 text-white rounded-xl shrink-0 active:scale-95 transition-all"
-            >
-              <Copy className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <div className="space-y-1.5"><label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{labels.linkLabel}</label><div className="flex items-center gap-2 rounded-xl border border-gray-800 bg-gray-900 p-3 text-xs text-gray-500"><LockKeyhole className="h-4 w-4 shrink-0"/><span>{labels.linkUnavailable}</span></div></div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] text-gray-400 font-semibold uppercase">{labels.available}</p>
-            <p className="text-xl font-extrabold text-emerald-400">$0.00</p>
-            <p className="text-[10px] text-gray-500">{labels.minWithdrawal}</p>
-          </div>
-          <button className="px-4 py-2 bg-gray-800 text-gray-400 rounded-xl text-xs font-bold cursor-not-allowed">
-            {labels.request}
-          </button>
+        <div className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-900 p-4">
+          <div><p className="text-[10px] font-semibold uppercase text-gray-400">{labels.balance}</p><p className="mt-1 text-xl font-extrabold text-gray-500">—</p></div>
+          <button type="button" disabled className="cursor-not-allowed rounded-xl bg-gray-800 px-4 py-2 text-xs font-bold text-gray-500">{labels.withdraw}</button>
         </div>
 
         <div className="space-y-2 pt-1">
-          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{labels.howItWorks}</h4>
-          <p className="text-xs text-gray-400 leading-relaxed">
-            {labels.levelDescription}
-          </p>
-
-          <div className="bg-gray-900 border border-brand-500 rounded-2xl p-3 flex items-center justify-between">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 text-xs font-bold text-white">
-                <span className="w-2.5 h-2.5 rounded-full bg-brand-500" />
-                <span>1 {t('level')} 10%</span>
-              </div>
-              <span className="text-[10px] text-gray-500 mt-0.5 ml-4.5">{labels.basicLevel}</span>
+          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">{labels.howItWorks}</h4>
+          <p className="text-xs leading-relaxed text-gray-400">{labels.rewardInfo}</p>
+          {[
+            {num:1,percent:10,detail:labels.baseLevel},
+            {num:2,percent:20,detail:labels.invite10},
+            {num:3,percent:35,detail:labels.invite30},
+          ].map((item) => (
+            <div key={item.num} className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-900 p-3">
+              <div className="flex flex-col gap-1"><div className="flex items-center gap-2 text-xs font-bold text-white"><span className="h-2.5 w-2.5 rounded-full bg-gray-600"/>{item.num} {labels.level} · {item.percent}%</div><span className="ml-[18px] text-[10px] text-gray-500">{item.detail}</span></div>
+              {item.num === 1 && <span className="rounded-md bg-gray-800 px-2 py-1 text-[10px] font-bold text-gray-400">{labels.current}</span>}
             </div>
-            <span className="text-[10px] bg-brand-600 text-white font-extrabold px-2 py-0.5 rounded-md">{labels.yours}</span>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-3 flex items-center justify-between">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 text-xs font-bold text-white">
-                <span className="w-2.5 h-2.5 rounded-full bg-gray-500" />
-                <span>2 {t('level')} 20%</span>
-              </div>
-              <span className="text-[10px] text-gray-500 mt-0.5 ml-4.5">{labels.invite10}</span>
-            </div>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-3 flex items-center justify-between">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 text-xs font-bold text-white">
-                <span className="w-2.5 h-2.5 rounded-full bg-gray-500" />
-                <span>3 {t('level')} 35%</span>
-              </div>
-              <span className="text-[10px] text-gray-500 mt-0.5 ml-4.5">{labels.invite30}</span>
-            </div>
-          </div>
+          ))}
         </div>
       </Modal>
     </section>
