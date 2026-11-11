@@ -100,9 +100,6 @@ export default function CatalogView({
             >
               <div className="flex items-center justify-between">
                 <span className="text-2xl">{country.flag}</span>
-                <span className="text-[10px] font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-1.5 py-0.5 rounded-md">
-                  5G / 4G
-                </span>
               </div>
 
               <div>
