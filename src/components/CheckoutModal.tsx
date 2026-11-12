@@ -414,26 +414,27 @@ export default function CheckoutModal({
           </button>
         </div>
 
-        {/* Согласие с условиями */}
-        <label className="flex cursor-pointer items-start gap-2 pt-1 text-xs text-gray-400">
+{/* Согласие с условиями */}
+<label className="flex min-h-[52px] cursor-pointer items-center gap-3 py-2 text-base font-medium text-gray-300">
 
-          <input
-            type="checkbox"
-            checked={terms}
-            onChange={(event) =>
-              setTerms(event.target.checked)
-            }
-            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-700 bg-gray-900 text-brand-500 focus:ring-brand-500"
-          />
+  <input
+    type="checkbox"
+    checked={terms}
+    onChange={(event) =>
+      setTerms(event.target.checked)
+    }
+    className="h-6 w-6 shrink-0 cursor-pointer rounded-md border-2 border-gray-600 bg-gray-900 accent-cyan-500 focus:ring-2 focus:ring-cyan-400"
+  />
 
-          <span>
-            {text.agreement}{' '}
+  <span className="leading-snug">
+    {text.agreement}{' '}
 
-            <span className="text-brand-400">
-              {text.terms}
-            </span>
-          </span>
-        </label>
+    <span className="font-semibold text-brand-400">
+      {text.terms}
+    </span>
+  </span>
+
+</label>
 
         {/* Демонстрационный режим */}
         <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
