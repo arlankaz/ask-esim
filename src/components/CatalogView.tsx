@@ -1,7 +1,8 @@
 
 import { Search, Smartphone, ChevronRight } from 'lucide-react';
 import type { Country, Currency } from '../types';
-import { USD_RATE } from '../types';
+import { getLowestPriceKzt } from '../data/eSIMCatalog';
+import { formatPrice } from '../utils';
 
 interface CatalogViewProps {
   search: string;
@@ -24,8 +25,6 @@ const CATEGORIES = [
   'africa',
   'global',
 ] as const;
-
-const DEMO_PRICE_MULTIPLIER = 2.5;
 
 export default function CatalogView({
   search,
@@ -56,15 +55,13 @@ export default function CatalogView({
   };
 
   const priceFrom = (country: Country): string => {
-    const priceKzt = Math.round(
-      country.startUsd * USD_RATE * DEMO_PRICE_MULTIPLIER
-    );
+  const priceKzt = getLowestPriceKzt(country.id);
 
-    return currency === 'KZT'
-      ? `${priceKzt.toLocaleString('ru-RU')} ₸`
-      : `$${(priceKzt / USD_RATE).toFixed(2)}`;
-  };
+  if (priceKzt === null) return '—';
 
+  return formatPrice(priceKzt, currency);
+};
+  
   return (
     <section className="mx-auto w-full max-w-2xl space-y-5 px-4 pb-5 pt-4">
 
