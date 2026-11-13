@@ -69,9 +69,9 @@ const translations: Record<Language, CheckoutText> = {
     days: 'дней',
     total: 'Итого к оплате:',
     deliveryTitle: 'Получение eSIM',
-    telegramTitle: 'Через Telegram',
+    telegramTitle: 'В чат с нашим ботом в Telegram',
     telegramDescription:
-      'После оплаты QR-код и инструкция по активации будут отправлены вам в Telegram.',
+    'После успешной оплаты, QR-код и инструкция по активации будут отправлены вам в чат с нашим ботом в Telegram.',
     telegramNote:
       'Основной способ доставки',
     emailLabel: 'Email (необязательно)',
@@ -363,38 +363,7 @@ export default function CheckoutModal({
           </div>
         </div>
 
-        {/* Доставка через Telegram */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-bold text-gray-200">
-            {text.deliveryTitle}
-          </h4>
-
-          <div className="rounded-2xl border border-brand-500/40 bg-brand-500/10 p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-500/20 text-brand-400">
-                <Send className="h-6 w-6" />
-              </div>
-
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-base font-bold text-white">
-                    {text.telegramTitle}
-                  </span>
-                  <CheckCircle2 className="h-4 w-4 text-cyan-400" />
-                </div>
-
-                <p className="text-xs font-medium text-cyan-300">
-                  {text.telegramNote}
-                </p>
-
-                <p className="text-sm leading-relaxed text-gray-300">
-                  {text.telegramDescription}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
+  
         {/* Необязательный email */}
         <div className="space-y-2">
           <label
@@ -491,6 +460,39 @@ export default function CheckoutModal({
           </span>
         </label>
 
+        {/* Доставка через Telegram */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-bold text-gray-200">
+            {text.deliveryTitle}
+          </h4>
+
+          <div className="rounded-2xl border border-brand-500/40 bg-brand-500/10 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-500/20 text-brand-400">
+                <Send className="h-6 w-6" />
+              </div>
+
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-base font-bold text-white">
+                    {text.telegramTitle}
+                  </span>
+                  <CheckCircle2 className="h-4 w-4 text-cyan-400" />
+                </div>
+
+                <p className="text-xs font-medium text-cyan-300">
+                  {text.telegramNote}
+                </p>
+
+                <p className="text-sm leading-relaxed text-gray-300">
+                  {text.telegramDescription}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div> 
+
+        
         {/* Демонстрационный режим */}
         <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
