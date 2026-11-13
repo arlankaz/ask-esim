@@ -8,6 +8,7 @@ import CheckoutModal from './components/CheckoutModal';
 import CompatModal from './components/CompatModal';
 import Toast from './components/Toast';
 import { countriesData } from './data';
+import { hasEsimPlans } from './data/eSIMCatalog';
 import type { Country, Currency, SelectedTariff } from './types';
 import {
   getInitialLanguage,
@@ -123,6 +124,8 @@ const visibleCountries = useMemo(() => {
   const region = REGION_BY_CATEGORY[category];
 
   return countriesData.filter((country) => {
+    if (!hasEsimPlans(country.id)) return false;
+    
     const translatedName =
       translations[lang]?.[country.id.toLowerCase()] ??
       translations[lang]?.[country.name.toLowerCase()] ??
