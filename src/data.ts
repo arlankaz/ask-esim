@@ -1,4 +1,4 @@
-import type { Country, FixedTier, UnlimitedTier } from './types';
+import type { Country } from './types';
 
 export const countriesData: Country[] = [
   { id: 'TR', name: 'Турция', flag: '🇹🇷', region: 'EU', startUsd: 1.14, popular: true },
@@ -84,18 +84,4 @@ export const countriesData: Country[] = [
   { id: 'BR', name: 'Бразилия', flag: '🇧🇷', region: 'AMERICA', startUsd: 1.7, popular: false },
   { id: 'AR', name: 'Аргентина', flag: '🇦🇷', region: 'AMERICA', startUsd: 1.8, popular: false },
   { id: 'CO', name: 'Колумбия', flag: '🇨🇴', region: 'AMERICA', startUsd: 1.8, popular: false },
-];
-
-export const fixedTiers: FixedTier[] = [
-  { id: '1gb', volume: '1 GB', days: 7, mult: 1.0, badge: '⚡ Мгновенно' },
-  { id: '3gb', volume: '3 GB', days: 15, mult: 2.2, badge: '🔄 Пополняемый' },
-  { id: '5gb', volume: '5 GB', days: 30, mult: 3.5, badge: '🔔 PUSH при 100 МБ' },
-  { id: '10gb', volume: '10 GB', days: 30, mult: 6.0, badge: '🔥 Выгодный' },
-  { id: '20gb', volume: '20 GB', days: 30, mult: 10.5, badge: '🚀 Максимум' },
-];
-
-export const unlimitedTiers: UnlimitedTier[] = [
-  { id: 'unlim_3d', volume: 'Безлимит', days: 3, mult: 3.8, fup: '2 ГБ/день на 5G, далее 128 кб/с' },
-  { id: 'unlim_7d', volume: 'Безлимит', days: 7, mult: 7.2, fup: '2 ГБ/день на 5G, далее 128 кб/с' },
-  { id: 'unlim_15d', volume: 'Безлимит', days: 15, mult: 13.5, fup: '2 ГБ/день на 5G, далее 128 кб/с' },
 ];
