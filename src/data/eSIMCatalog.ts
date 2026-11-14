@@ -10,7 +10,8 @@ import type { SelectedTariff } from '../types';
 // нужно проверять актуальность цен и доступности через API.
 
 const PRODUCTS: Record<string, string> = {
-  TR: '5:CKH267:5|10:CKH268:6.5|20:CKH738:13.5|50:CKH739:31',
+  
+  TR: '5:CKH267:5|10:CKH268:6.5|20:CKH738:10|50:CKH739:19.98',
   EG: '5:MB034:11|10:MB039:24.5|20:PIXA8CXUL:42',
   AE: '5:CKH693:16|10:PQHJ267ZM:29|20:P0LWCN1S2:52',
   GE: '5:CKH602:8|10:CKH742:15.5|20:CKH743:29',
